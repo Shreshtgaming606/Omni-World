@@ -14,6 +14,10 @@ namespace OmniWorld
         private SoundPlayer power;
         private SoundPlayer dash;
         private SoundPlayer bounce;
+        private SoundPlayer dataCore;
+        private SoundPlayer shield;
+        private SoundPlayer slamStart;
+        private SoundPlayer slamImpact;
         private SoundPlayer blockBreak;
         private SoundPlayer goal;
         private SoundPlayer bgm;
@@ -24,6 +28,10 @@ namespace OmniWorld
         private MemoryStream powerStream;
         private MemoryStream dashStream;
         private MemoryStream bounceStream;
+        private MemoryStream dataCoreStream;
+        private MemoryStream shieldStream;
+        private MemoryStream slamStartStream;
+        private MemoryStream slamImpactStream;
         private MemoryStream blockBreakStream;
         private MemoryStream goalStream;
         private MemoryStream bgmStream;
@@ -43,6 +51,10 @@ namespace OmniWorld
                 powerStream = MakeTone(720, 0.24, 0.28);
                 dashStream = MakeChord(new int[] { 540, 810, 1080 }, 0.11, 0.18);
                 bounceStream = MakeChord(new int[] { 380, 570, 760 }, 0.13, 0.22);
+                dataCoreStream = MakeChord(new int[] { 520, 780, 1040, 1560 }, 0.22, 0.19);
+                shieldStream = MakeChord(new int[] { 660, 990, 1320 }, 0.16, 0.19);
+                slamStartStream = MakeTone(220, 0.10, 0.24);
+                slamImpactStream = MakeChord(new int[] { 110, 165, 330 }, 0.18, 0.28);
                 blockBreakStream = MakeNoiseClick();
                 goalStream = MakeChord(new int[] { 420, 560, 700 }, 0.35, 0.20);
                 bgmStream = MakeMusicLoop();
@@ -54,6 +66,10 @@ namespace OmniWorld
                 power = new SoundPlayer(powerStream);
                 dash = new SoundPlayer(dashStream);
                 bounce = new SoundPlayer(bounceStream);
+                dataCore = new SoundPlayer(dataCoreStream);
+                shield = new SoundPlayer(shieldStream);
+                slamStart = new SoundPlayer(slamStartStream);
+                slamImpact = new SoundPlayer(slamImpactStream);
                 blockBreak = new SoundPlayer(blockBreakStream);
                 goal = new SoundPlayer(goalStream);
                 bgm = new SoundPlayer(bgmStream);
@@ -86,6 +102,10 @@ namespace OmniWorld
         public void PlayPower() { TryPlay(power); }
         public void PlayDash() { TryPlay(dash); }
         public void PlayBounce() { TryPlay(bounce); }
+        public void PlayDataCore() { TryPlay(dataCore); }
+        public void PlayShield() { TryPlay(shield); }
+        public void PlaySlamStart() { TryPlay(slamStart); }
+        public void PlaySlamImpact() { TryPlay(slamImpact); }
         public void PlayBreak() { TryPlay(blockBreak); }
         public void PlayGoal() { TryPlay(goal); }
 

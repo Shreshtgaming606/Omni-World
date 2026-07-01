@@ -7,6 +7,7 @@ namespace OmniWorld
     {
         private const int ViewWidth = 960;
         private const int ViewHeight = 540;
+        public const int ObjectiveTotal = 4;
 
         public GameScreen Screen;
         public Level CurrentLevel;
@@ -16,6 +17,10 @@ namespace OmniWorld
         public ParticleSystem Particles;
         public int SelectedCourseIndex;
         public bool[] CourseCompleted;
+        public int[] CourseBestScores;
+        public int[] CourseBestDataCores;
+        public int[] CourseDataCoreTotals;
+        public int[] CourseBestObjectiveStars;
         public float CourseClearTimer;
         public int AirStompChain;
         public float ComboPopupTimer;
@@ -35,16 +40,26 @@ namespace OmniWorld
         public Game(AudioManager audioManager)
         {
             audio = audioManager;
-            courseNames = new string[] { "Greenlit Grove", "Voltage Vale", "Crystal Canopy", "Emberworks", "Skyline Circuit" };
+            courseNames = new string[] { "Greenlit Grove", "Voltage Vale", "Crystal Canopy", "Emberworks", "Skyline Circuit", "Prism Reactor" };
             courseTaglines = new string[]
             {
                 "Bright hills, friendly jumps, and starter enemies.",
                 "Moving platforms, sharper hazards, and a tense finish.",
                 "Glowing cliffs, longer gaps, and careful platform timing.",
                 "Hot vents, heavy enemy pressure, and burst-cell routes.",
-                "High platforms, precision bounce pads, and a fast final run."
+                "High platforms, precision bounce pads, and a fast final run.",
+                "A neon finale with layered hazards and rare Data Cores."
             };
             CourseCompleted = new bool[courseNames.Length];
+            CourseBestScores = new int[courseNames.Length];
+            CourseBestDataCores = new int[courseNames.Length];
+            CourseDataCoreTotals = new int[courseNames.Length];
+            CourseBestObjectiveStars = new int[courseNames.Length];
+            for (int i = 0; i < CourseDataCoreTotals.Length; i++)
+            {
+                CourseDataCoreTotals[i] = CountDataCores(LevelFactory.CreateCourse(i + 1));
+            }
+
             SelectedCourseIndex = 0;
             Screen = GameScreen.CourseSelect;
             Player = new Player(64f, 400f);
@@ -63,6 +78,16 @@ namespace OmniWorld
         public string[] CourseTaglines
         {
             get { return courseTaglines; }
+        }
+
+        public int CurrentDataCoreTotal
+        {
+            get { return CourseDataCoreTotals[SelectedCourseIndex]; }
+        }
+
+        public int CurrentObjectiveStars
+        {
+            get { return CountCurrentObjectiveStars(); }
         }
 
         public void Update(InputState input, float dt)
@@ -226,6 +251,11 @@ namespace OmniWorld
                 AddShake(2.4f, 0.14f);
                 burstTrailTimer = 0.025f;
             }
+            if (Player.SlamStartedThisFrame)
+            {
+                Particles.EmitSlamStart(Player.Bounds);
+                AddShake(1.6f, 0.11f);
+            }
 
             float fallSpeed = Player.Velocity.Y;
             Physics.MovePlayer(Player, CurrentLevel, dt, audio);
@@ -273,6 +303,7 @@ namespace OmniWorld
                 {
                     AirStompChain++;
                     enemy.Defeat(Player, audio);
+                    Player.EnemiesDefeated++;
                     if (AirStompChain > 1)
                     {
                         Player.AddScore((AirStompChain - 1) * 100);
@@ -283,19 +314,34 @@ namespace OmniWorld
                     AddShake(2.5f, 0.13f);
                     playerBounds = Player.Bounds;
                 }
-                else if (Player.Powered || Player.Bursting)
+                else if (Player.Powered || Player.Bursting || Player.Slamming)
                 {
+                    bool slamAttack = Player.Slamming;
                     enemy.Active = false;
-                    Player.AddScore(Player.Bursting ? 275 : 200);
-                    Particles.EmitImpact(enemyBounds, Player.Bursting ? Color.FromArgb(255, 247, 91) : Color.FromArgb(64, 236, 210));
-                    AddShake(Player.Bursting ? 3.2f : 2.0f, 0.14f);
+                    Player.EnemiesDefeated++;
+                    if (slamAttack)
+                    {
+                        Player.SlamHits++;
+                        Player.Velocity.Y = -265f;
+                        Player.Slamming = false;
+                    }
+
+                    Player.AddScore(slamAttack ? 325 : Player.Bursting ? 275 : 200);
+                    Particles.EmitImpact(enemyBounds, Player.Bursting || slamAttack ? Color.FromArgb(255, 247, 91) : Color.FromArgb(64, 236, 210));
+                    AddShake(Player.Bursting || slamAttack ? 3.2f : 2.0f, 0.14f);
                     audio.PlayStomp();
                 }
                 else
                 {
                     bool canDamage = Player.InvincibleTimer <= 0f && !Player.Powered;
                     bool emptyHealth = Player.TakeDamage(audio);
-                    if (canDamage)
+                    if (Player.ShieldBlockedThisFrame)
+                    {
+                        Particles.EmitShieldBlock(Player.Bounds);
+                        AddShake(3.2f, 0.18f);
+                        AirStompChain = 0;
+                    }
+                    else if (canDamage)
                     {
                         Particles.EmitDamage(Player.Bounds);
                         AddShake(5.0f, 0.25f);
@@ -375,6 +421,29 @@ namespace OmniWorld
                     AddShake(1.7f, 0.12f);
                     audio.PlayDash();
                 }
+                else if (item.Kind == CollectibleKind.DataCore)
+                {
+                    Player.DataCores++;
+                    Player.BurstCooldown = 0f;
+                    Player.AddScore(750);
+                    if (Player.DataCores == CurrentDataCoreTotal && CurrentDataCoreTotal > 0)
+                    {
+                        Player.Lives++;
+                        Player.AddScore(500);
+                    }
+
+                    Particles.EmitDataCore(item.Bounds);
+                    AddShake(4.4f, 0.30f);
+                    audio.PlayDataCore();
+                }
+                else if (item.Kind == CollectibleKind.AegisCore)
+                {
+                    if (Player.AegisCharges < 2) Player.AegisCharges++;
+                    Player.AddScore(350);
+                    Particles.EmitShieldBlock(item.Bounds);
+                    AddShake(2.0f, 0.14f);
+                    audio.PlayShield();
+                }
             }
         }
 
@@ -391,6 +460,7 @@ namespace OmniWorld
                 Player.Position.Y = pad.Bounds.Top - Player.Size.Height - 0.5f;
                 Player.Velocity.Y = -700f;
                 Player.OnGround = false;
+                Player.Slamming = false;
                 Player.BurstCooldown = 0f;
                 pad.PulseTimer = 0f;
                 Particles.EmitBounce(pad.Bounds);
@@ -428,7 +498,13 @@ namespace OmniWorld
             {
                 bool canDamage = Player.InvincibleTimer <= 0f && !Player.Powered;
                 bool emptyHealth = Player.TakeDamage(audio);
-                if (canDamage)
+                if (Player.ShieldBlockedThisFrame)
+                {
+                    Particles.EmitShieldBlock(Player.Bounds);
+                    AddShake(3.2f, 0.18f);
+                    AirStompChain = 0;
+                }
+                else if (canDamage)
                 {
                     Particles.EmitDamage(Player.Bounds);
                     AddShake(5.5f, 0.25f);
@@ -453,6 +529,7 @@ namespace OmniWorld
 
             CourseCompleted[SelectedCourseIndex] = true;
             Player.AddScore(1000);
+            StoreCourseBest();
             CourseClearTimer = 0f;
             Screen = GameScreen.CourseComplete;
             Particles.EmitGoal(CurrentLevel.Goal.Bounds);
@@ -481,7 +558,7 @@ namespace OmniWorld
             float desiredLookAhead = Math.Abs(Player.Velocity.X) > 40f ? Player.Facing * 86f : 0f;
             cameraLookAhead = GameMath.Approach(cameraLookAhead, desiredLookAhead, 320f * dt);
 
-            float verticalBias = Player.Velocity.Y < -120f ? 0.62f : 0.56f;
+            float verticalBias = Player.Slamming ? 0.45f : Player.Velocity.Y < -120f ? 0.62f : 0.56f;
             float targetX = Player.Position.X + Player.Size.Width * 0.5f - ViewWidth * 0.45f + cameraLookAhead;
             float targetY = Player.Position.Y + Player.Size.Height * 0.5f - ViewHeight * verticalBias;
 
@@ -496,12 +573,19 @@ namespace OmniWorld
 
         private void ResolveMovementFeedback(bool wasOnGround, float fallSpeed, float dt)
         {
+            bool slamLanded = Player.Slamming && !wasOnGround && Player.OnGround;
+
             if (!wasOnGround && Player.OnGround)
             {
                 Particles.EmitLandingDust(Player.Bounds, fallSpeed);
                 if (fallSpeed > 520f)
                 {
                     AddShake(1.8f, 0.11f);
+                }
+
+                if (slamLanded)
+                {
+                    ResolveCoreSlamImpact();
                 }
 
                 AirStompChain = 0;
@@ -558,6 +642,53 @@ namespace OmniWorld
             return min + (float)random.NextDouble() * (max - min);
         }
 
+        private void ResolveCoreSlamImpact()
+        {
+            RectangleF playerBounds = Player.Bounds;
+            RectangleF shockwave = new RectangleF(playerBounds.Left - 58f, playerBounds.Bottom - 26f, playerBounds.Width + 116f, 58f);
+            int defeated = 0;
+            int broken = 0;
+
+            for (int i = 0; i < CurrentLevel.Enemies.Count; i++)
+            {
+                Enemy enemy = CurrentLevel.Enemies[i];
+                if (!enemy.Active || !enemy.Bounds.IntersectsWith(shockwave)) continue;
+
+                enemy.Active = false;
+                defeated++;
+                Player.EnemiesDefeated++;
+                Player.SlamHits++;
+                Player.AddScore(325);
+                Particles.EmitImpact(enemy.Bounds, Color.FromArgb(255, 247, 91));
+            }
+
+            int left = (int)Math.Floor(shockwave.Left / Level.TileSize);
+            int right = (int)Math.Floor((shockwave.Right - 1f) / Level.TileSize);
+            int top = (int)Math.Floor(shockwave.Top / Level.TileSize);
+            int bottom = (int)Math.Floor((shockwave.Bottom - 1f) / Level.TileSize);
+
+            for (int y = top; y <= bottom; y++)
+            {
+                for (int x = left; x <= right; x++)
+                {
+                    if (CurrentLevel.GetTile(x, y) != TileType.Breakable) continue;
+
+                    CurrentLevel.BreakTile(x, y);
+                    broken++;
+                    Player.AddScore(90);
+                    Particles.EmitImpact(new RectangleF(x * Level.TileSize, y * Level.TileSize, Level.TileSize, Level.TileSize), Color.FromArgb(225, 133, 255));
+                }
+            }
+
+            Player.Slamming = false;
+            Player.BurstCooldown = Math.Min(Player.BurstCooldown, 0.25f);
+            Particles.EmitSlamImpact(playerBounds);
+            AddShake(5.7f + defeated * 0.45f + broken * 0.18f, 0.24f);
+            audio.PlaySlamImpact();
+            if (defeated > 0) audio.PlayStomp();
+            if (broken > 0) audio.PlayBreak();
+        }
+
         private bool AllCoursesCompleted()
         {
             for (int i = 0; i < CourseCompleted.Length; i++)
@@ -566,6 +697,71 @@ namespace OmniWorld
             }
 
             return true;
+        }
+
+        private void StoreCourseBest()
+        {
+            if (Player.Score > CourseBestScores[SelectedCourseIndex])
+            {
+                CourseBestScores[SelectedCourseIndex] = Player.Score;
+            }
+
+            if (Player.DataCores > CourseBestDataCores[SelectedCourseIndex])
+            {
+                CourseBestDataCores[SelectedCourseIndex] = Player.DataCores;
+            }
+
+            int objectives = CountCurrentObjectiveStars();
+            if (objectives > CourseBestObjectiveStars[SelectedCourseIndex])
+            {
+                CourseBestObjectiveStars[SelectedCourseIndex] = objectives;
+            }
+        }
+
+        public bool IsCurrentObjectiveComplete(int index)
+        {
+            if (index == 0) return CourseCompleted[SelectedCourseIndex];
+            if (index == 1) return CurrentDataCoreTotal > 0 && Player.DataCores >= CurrentDataCoreTotal;
+            if (index == 2) return Player.Orbs >= CurrentLevel.ObjectiveOrbGoal;
+            if (index == 3) return Player.EnemiesDefeated >= CurrentLevel.ObjectiveEnemyGoal;
+            return false;
+        }
+
+        public string GetCurrentObjectiveText(int index)
+        {
+            if (index == 0) return "Reach the end beacon";
+            if (index == 1) return "Data Cores " + Player.DataCores + "/" + CurrentDataCoreTotal;
+            if (index == 2) return "Energy Orbs " + Player.Orbs + "/" + CurrentLevel.ObjectiveOrbGoal;
+            if (index == 3) return "Enemies " + Player.EnemiesDefeated + "/" + CurrentLevel.ObjectiveEnemyGoal;
+            return "";
+        }
+
+        private int CountCurrentObjectiveStars()
+        {
+            int count = 0;
+            for (int i = 0; i < ObjectiveTotal; i++)
+            {
+                if (IsCurrentObjectiveComplete(i))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private static int CountDataCores(Level level)
+        {
+            int count = 0;
+            for (int i = 0; i < level.Collectibles.Count; i++)
+            {
+                if (level.Collectibles[i].Kind == CollectibleKind.DataCore)
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
     }
 }

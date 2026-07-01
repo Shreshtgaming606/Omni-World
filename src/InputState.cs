@@ -64,6 +64,11 @@ namespace OmniWorld
             get { return WasPressed(Keys.Down) || WasPressed(Keys.S); }
         }
 
+        public bool SlamPressed
+        {
+            get { return WasPressed(Keys.Down) || WasPressed(Keys.S); }
+        }
+
         public bool Run
         {
             get { return IsDown(Keys.ShiftKey) || IsDown(Keys.LShiftKey) || IsDown(Keys.RShiftKey); }

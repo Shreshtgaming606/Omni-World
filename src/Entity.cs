@@ -35,7 +35,7 @@ namespace OmniWorld
         {
             Kind = kind;
             Position = new Vec2(x, y);
-            Size = kind == CollectibleKind.FluxCore || kind == CollectibleKind.BurstCell ? new SizeF(24f, 24f) : new SizeF(18f, 18f);
+            Size = kind == CollectibleKind.FluxCore || kind == CollectibleKind.BurstCell || kind == CollectibleKind.DataCore || kind == CollectibleKind.AegisCore ? new SizeF(24f, 24f) : new SizeF(18f, 18f);
             Collected = false;
             BobTimer = 0f;
         }

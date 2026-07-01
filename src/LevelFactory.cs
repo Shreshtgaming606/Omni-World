@@ -6,6 +6,7 @@ namespace OmniWorld
     {
         public static Level CreateCourse(int courseNumber)
         {
+            if (courseNumber == 6) return CreatePrismReactor();
             if (courseNumber == 5) return CreateSkylineCircuit();
             if (courseNumber == 4) return CreateEmberworks();
             if (courseNumber == 3) return CreateCrystalCanopy();
@@ -15,7 +16,7 @@ namespace OmniWorld
 
         public static Level[] CreateAllCourses()
         {
-            return new Level[] { CreateGreenlitGrove(), CreateVoltageVale(), CreateCrystalCanopy(), CreateEmberworks(), CreateSkylineCircuit() };
+            return new Level[] { CreateGreenlitGrove(), CreateVoltageVale(), CreateCrystalCanopy(), CreateEmberworks(), CreateSkylineCircuit(), CreatePrismReactor() };
         }
 
         private static Level CreateGreenlitGrove()
@@ -68,6 +69,10 @@ namespace OmniWorld
             level.AddPowerUp(75, 10);
             level.AddBurstCell(95, 10);
             level.AddHeart(125, 10);
+            level.AddDataCore(24, 9);
+            level.AddDataCore(87, 9);
+            level.AddDataCore(148, 9);
+            level.AddAegisCore(57, 10);
 
             level.AddBouncePad(27, 15);
             level.AddBouncePad(58, 15);
@@ -82,6 +87,7 @@ namespace OmniWorld
             level.AddCheckpoint(66, 15);
             level.AddCheckpoint(121, 15);
             level.SetGoal(166, 15);
+            level.SetObjectives(25, 4);
 
             return level;
         }
@@ -157,6 +163,10 @@ namespace OmniWorld
             level.AddBurstCell(79, 10);
             level.AddBurstCell(191, 10);
             level.AddHeart(135, 9);
+            level.AddDataCore(38, 9);
+            level.AddDataCore(133, 8);
+            level.AddDataCore(212, 8);
+            level.AddAegisCore(158, 10);
 
             level.AddBouncePad(44, 15);
             level.AddBouncePad(105, 15);
@@ -171,10 +181,12 @@ namespace OmniWorld
             level.AddGroundEnemy(EnemyKind.Seeker, 154, 15, 146, 161);
             level.AddGroundEnemy(EnemyKind.Hopper, 179, 15, 170, 187);
             level.AddGroundEnemy(EnemyKind.Seeker, 210, 15, 198, 223);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 132, 8, 118, 145);
 
             level.AddCheckpoint(82, 15);
             level.AddCheckpoint(171, 15);
             level.SetGoal(220, 15);
+            level.SetObjectives(32, 6);
 
             return level;
         }
@@ -248,6 +260,10 @@ namespace OmniWorld
             level.AddBurstCell(130, 10);
             level.AddBurstCell(205, 10);
             level.AddHeart(160, 10);
+            level.AddDataCore(53, 9);
+            level.AddDataCore(146, 9);
+            level.AddDataCore(221, 9);
+            level.AddAegisCore(119, 9);
 
             level.AddBouncePad(25, 15);
             level.AddBouncePad(55, 15);
@@ -261,10 +277,14 @@ namespace OmniWorld
             level.AddGroundEnemy(EnemyKind.Hopper, 149, 15, 135, 163);
             level.AddGroundEnemy(EnemyKind.Seeker, 188, 15, 173, 201);
             level.AddGroundEnemy(EnemyKind.Hopper, 225, 15, 212, 242);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 70, 8, 62, 91);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 146, 8, 135, 164);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 221, 8, 212, 244);
 
             level.AddCheckpoint(86, 15);
             level.AddCheckpoint(176, 15);
             level.SetGoal(239, 15);
+            level.SetObjectives(34, 5);
 
             return level;
         }
@@ -339,6 +359,10 @@ namespace OmniWorld
             level.AddBurstCell(178, 10);
             level.AddBurstCell(218, 10);
             level.AddHeart(132, 10);
+            level.AddDataCore(58, 9);
+            level.AddDataCore(154, 9);
+            level.AddDataCore(233, 9);
+            level.AddAegisCore(95, 9);
 
             level.AddBouncePad(26, 15);
             level.AddBouncePad(62, 15);
@@ -353,10 +377,14 @@ namespace OmniWorld
             level.AddGroundEnemy(EnemyKind.Seeker, 160, 15, 145, 173);
             level.AddGroundEnemy(EnemyKind.Hopper, 198, 15, 183, 213);
             level.AddGroundEnemy(EnemyKind.Seeker, 238, 15, 223, 253);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 80, 8, 70, 99);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 153, 8, 144, 174);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 232, 8, 222, 254);
 
             level.AddCheckpoint(72, 15);
             level.AddCheckpoint(184, 15);
             level.SetGoal(249, 15);
+            level.SetObjectives(34, 5);
 
             return level;
         }
@@ -436,6 +464,10 @@ namespace OmniWorld
             level.AddBurstCell(170, 10);
             level.AddBurstCell(248, 10);
             level.AddHeart(188, 10);
+            level.AddDataCore(89, 9);
+            level.AddDataCore(161, 9);
+            level.AddDataCore(266, 9);
+            level.AddAegisCore(148, 9);
 
             level.AddBouncePad(22, 15);
             level.AddBouncePad(57, 15);
@@ -453,10 +485,139 @@ namespace OmniWorld
             level.AddGroundEnemy(EnemyKind.Seeker, 190, 15, 176, 203);
             level.AddGroundEnemy(EnemyKind.Hopper, 228, 15, 214, 243);
             level.AddGroundEnemy(EnemyKind.Seeker, 270, 15, 254, 285);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 73, 8, 66, 94);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 147, 8, 140, 166);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 222, 8, 213, 244);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 265, 8, 253, 286);
 
             level.AddCheckpoint(104, 15);
             level.AddCheckpoint(214, 15);
             level.SetGoal(281, 15);
+            level.SetObjectives(36, 6);
+
+            return level;
+        }
+
+        private static Level CreatePrismReactor()
+        {
+            Level level = new Level(6, "Prism Reactor", "A neon finale that mixes every movement skill.", 316, 18);
+            level.SkyTop = Color.FromArgb(42, 31, 96);
+            level.SkyBottom = Color.FromArgb(64, 203, 208);
+            level.GroundTop = Color.FromArgb(225, 133, 255);
+            level.GroundBody = Color.FromArgb(45, 66, 126);
+            level.Spawn = new Vec2(2 * Level.TileSize, 15 * Level.TileSize - 30f);
+
+            Ground(level, 0, 22);
+            Ground(level, 29, 53);
+            Ground(level, 61, 87);
+            Ground(level, 96, 124);
+            Ground(level, 133, 161);
+            Ground(level, 172, 201);
+            Ground(level, 211, 240);
+            Ground(level, 252, 283);
+            Ground(level, 292, 314);
+
+            Platform(level, 10, 12, 5);
+            Platform(level, 19, 12, 4);
+            Platform(level, 34, 12, 5);
+            Platform(level, 48, 12, 4);
+            Platform(level, 68, 12, 5);
+            Platform(level, 82, 12, 4);
+            Platform(level, 105, 12, 5);
+            Platform(level, 119, 12, 4);
+            Platform(level, 142, 12, 5);
+            Platform(level, 156, 12, 4);
+            Platform(level, 181, 12, 5);
+            Platform(level, 196, 12, 4);
+            Platform(level, 221, 12, 5);
+            Platform(level, 236, 12, 4);
+            Platform(level, 263, 12, 5);
+            Platform(level, 278, 12, 4);
+            Platform(level, 300, 12, 5);
+
+            Breakables(level, 35, 12, 3);
+            Breakables(level, 107, 12, 3);
+            Breakables(level, 143, 12, 3);
+            Breakables(level, 222, 12, 3);
+            Breakables(level, 264, 12, 3);
+
+            Spikes(level, 15, 14, 3);
+            Spikes(level, 70, 14, 4);
+            Spikes(level, 114, 14, 4);
+            Spikes(level, 151, 14, 4);
+            Spikes(level, 187, 14, 5);
+            Spikes(level, 231, 14, 4);
+            Spikes(level, 270, 14, 4);
+            Spikes(level, 303, 14, 3);
+
+            level.MovingPlatforms.Add(new MovingPlatform(23 * Level.TileSize, 12 * Level.TileSize, 29 * Level.TileSize, 12 * Level.TileSize, 88f, 16f, 104f));
+            level.MovingPlatforms.Add(new MovingPlatform(54 * Level.TileSize, 12 * Level.TileSize, 61 * Level.TileSize, 13 * Level.TileSize, 88f, 16f, 94f));
+            level.MovingPlatforms.Add(new MovingPlatform(88 * Level.TileSize, 13 * Level.TileSize, 96 * Level.TileSize, 12 * Level.TileSize, 88f, 16f, 112f));
+            level.MovingPlatforms.Add(new MovingPlatform(125 * Level.TileSize, 12 * Level.TileSize, 133 * Level.TileSize, 12 * Level.TileSize, 88f, 16f, 108f));
+            level.MovingPlatforms.Add(new MovingPlatform(162 * Level.TileSize, 13 * Level.TileSize, 172 * Level.TileSize, 12 * Level.TileSize, 88f, 16f, 116f));
+            level.MovingPlatforms.Add(new MovingPlatform(202 * Level.TileSize, 12 * Level.TileSize, 211 * Level.TileSize, 13 * Level.TileSize, 88f, 16f, 110f));
+            level.MovingPlatforms.Add(new MovingPlatform(241 * Level.TileSize, 12 * Level.TileSize, 252 * Level.TileSize, 12 * Level.TileSize, 88f, 16f, 122f));
+            level.MovingPlatforms.Add(new MovingPlatform(284 * Level.TileSize, 13 * Level.TileSize, 292 * Level.TileSize, 12 * Level.TileSize, 88f, 16f, 118f));
+
+            level.AddOrbLine(6, 13, 5);
+            level.AddOrbLine(11, 10, 4);
+            level.AddOrbLine(35, 10, 4);
+            level.AddOrbLine(49, 10, 3);
+            level.AddOrbLine(69, 10, 5);
+            level.AddOrbLine(83, 10, 3);
+            level.AddOrbLine(106, 10, 5);
+            level.AddOrbLine(120, 10, 3);
+            level.AddOrbLine(143, 10, 5);
+            level.AddOrbLine(157, 10, 3);
+            level.AddOrbLine(182, 10, 5);
+            level.AddOrbLine(197, 10, 3);
+            level.AddOrbLine(222, 10, 5);
+            level.AddOrbLine(237, 10, 3);
+            level.AddOrbLine(264, 10, 5);
+            level.AddOrbLine(279, 10, 3);
+            level.AddOrbLine(301, 10, 4);
+            level.AddPowerUp(107, 10);
+            level.AddPowerUp(222, 10);
+            level.AddBurstCell(25, 10);
+            level.AddBurstCell(90, 10);
+            level.AddBurstCell(164, 10);
+            level.AddBurstCell(244, 10);
+            level.AddBurstCell(286, 10);
+            level.AddHeart(198, 10);
+            level.AddDataCore(49, 9);
+            level.AddDataCore(143, 9);
+            level.AddDataCore(222, 9);
+            level.AddDataCore(300, 9);
+            level.AddAegisCore(182, 9);
+            level.AddAegisCore(264, 9);
+
+            level.AddBouncePad(20, 15);
+            level.AddBouncePad(51, 15);
+            level.AddBouncePad(85, 15);
+            level.AddBouncePad(121, 15);
+            level.AddBouncePad(158, 15);
+            level.AddBouncePad(199, 15);
+            level.AddBouncePad(238, 15);
+            level.AddBouncePad(281, 15);
+
+            level.AddGroundEnemy(EnemyKind.Seeker, 14, 15, 2, 21);
+            level.AddGroundEnemy(EnemyKind.Hopper, 38, 15, 30, 52);
+            level.AddGroundEnemy(EnemyKind.Seeker, 72, 15, 62, 86);
+            level.AddGroundEnemy(EnemyKind.Roller, 110, 15, 97, 123);
+            level.AddGroundEnemy(EnemyKind.Hopper, 148, 15, 134, 160);
+            level.AddGroundEnemy(EnemyKind.Seeker, 187, 15, 173, 200);
+            level.AddGroundEnemy(EnemyKind.Hopper, 226, 15, 212, 239);
+            level.AddGroundEnemy(EnemyKind.Seeker, 268, 15, 253, 282);
+            level.AddGroundEnemy(EnemyKind.Hopper, 297, 15, 293, 302);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 69, 8, 61, 87);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 142, 8, 133, 161);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 222, 8, 211, 240);
+            level.AddFlyingEnemy(EnemyKind.Drifter, 300, 8, 292, 314);
+
+            level.AddCheckpoint(99, 15);
+            level.AddCheckpoint(213, 15);
+            level.SetGoal(309, 15);
+            level.SetObjectives(42, 7);
 
             return level;
         }

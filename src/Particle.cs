@@ -132,6 +132,21 @@ namespace OmniWorld
             EmitBurst(Center(bounds), Color.FromArgb(64, 236, 210), 14, 140f, 0.40f, 4f, ParticleKind.Shard, 30f);
         }
 
+        public void EmitDataCore(RectangleF bounds)
+        {
+            Vec2 center = Center(bounds);
+            EmitBurst(center, Color.FromArgb(255, 247, 91), 24, 210f, 0.55f, 5f, ParticleKind.Spark, -145f);
+            EmitBurst(center, Color.FromArgb(225, 133, 255), 18, 175f, 0.52f, 5f, ParticleKind.Shard, 40f);
+            EmitBurst(center, Color.FromArgb(64, 236, 210), 14, 145f, 0.46f, 4f, ParticleKind.Spark, -50f);
+        }
+
+        public void EmitShieldBlock(RectangleF bounds)
+        {
+            Vec2 center = Center(bounds);
+            EmitBurst(center, Color.FromArgb(122, 208, 255), 22, 170f, 0.42f, 5f, ParticleKind.Spark, -80f);
+            EmitBurst(center, Color.FromArgb(255, 255, 255), 12, 115f, 0.34f, 4f, ParticleKind.Shard, 10f);
+        }
+
         public void EmitBounce(RectangleF bounds)
         {
             Vec2 origin = new Vec2(bounds.Left + bounds.Width / 2f, bounds.Top + 2f);
@@ -145,6 +160,38 @@ namespace OmniWorld
                     RandomRange(0.26f, 0.48f),
                     RandomRange(3f, 6f),
                     120f);
+            }
+        }
+
+        public void EmitSlamStart(RectangleF bounds)
+        {
+            Vec2 origin = new Vec2(bounds.Left + bounds.Width / 2f, bounds.Top + bounds.Height * 0.35f);
+            for (int i = 0; i < 16; i++)
+            {
+                AddParticle(
+                    i % 2 == 0 ? ParticleKind.Spark : ParticleKind.Shard,
+                    new Vec2(origin.X + RandomRange(-10f, 10f), origin.Y + RandomRange(-8f, 8f)),
+                    new Vec2(RandomRange(-60f, 60f), RandomRange(110f, 260f)),
+                    i % 2 == 0 ? Color.FromArgb(255, 247, 91) : Color.FromArgb(64, 236, 210),
+                    RandomRange(0.16f, 0.30f),
+                    RandomRange(3f, 6f),
+                    30f);
+            }
+        }
+
+        public void EmitSlamImpact(RectangleF bounds)
+        {
+            Vec2 origin = new Vec2(bounds.Left + bounds.Width / 2f, bounds.Bottom - 2f);
+            for (int i = 0; i < 34; i++)
+            {
+                AddParticle(
+                    i % 3 == 0 ? ParticleKind.Smoke : ParticleKind.Shard,
+                    new Vec2(origin.X + RandomRange(-34f, 34f), origin.Y + RandomRange(-5f, 5f)),
+                    new Vec2(RandomRange(-240f, 240f), RandomRange(-150f, -28f)),
+                    i % 3 == 0 ? Color.FromArgb(196, 217, 187) : Color.FromArgb(255, 247, 91),
+                    RandomRange(0.28f, 0.54f),
+                    RandomRange(4f, 10f),
+                    180f);
             }
         }
 

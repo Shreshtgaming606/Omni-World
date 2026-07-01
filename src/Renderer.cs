@@ -62,6 +62,7 @@ namespace OmniWorld
             DrawParticles(g, game.Particles, camera);
             DrawEnemies(g, level, camera);
             DrawPlayer(g, game.Player, camera, game.WorldTime);
+            DrawWorldLighting(g, game, camera, game.WorldTime);
             DrawForegroundDecor(g, level, viewport, camera, game.WorldTime);
             DrawAtmosphereOverlay(g, level, viewport);
         }
@@ -95,9 +96,13 @@ namespace OmniWorld
             {
                 DrawEmberDecor(g, viewport, camera, time);
             }
-            else
+            else if (level.CourseNumber == 5)
             {
                 DrawSkylineDecor(g, viewport, camera, time);
+            }
+            else
+            {
+                DrawPrismDecor(g, viewport, camera, time);
             }
         }
 
@@ -122,21 +127,28 @@ namespace OmniWorld
                 float pulse = (float)Math.Sin(time * 2.1f) * 6f;
                 glow = new RectangleF(viewport.Width - 285f - pulse, 34f - pulse, 150f + pulse * 2f, 105f + pulse);
             }
-            else
+            else if (level.CourseNumber == 5)
             {
                 glow = new RectangleF(viewport.Width - 260f, 48f, 112f, 112f);
+            }
+            else
+            {
+                float pulse = (float)Math.Sin(time * 2.6f) * 7f;
+                glow = new RectangleF(viewport.Width - 274f - pulse, 42f - pulse, 132f + pulse * 2f, 132f + pulse * 2f);
             }
 
             Color softColor = level.CourseNumber == 1 ? Color.FromArgb(160, 255, 235, 118) :
                 level.CourseNumber == 2 ? Color.FromArgb(150, 124, 237, 255) :
                 level.CourseNumber == 3 ? Color.FromArgb(140, 231, 132, 255) :
                 level.CourseNumber == 4 ? Color.FromArgb(150, 255, 138, 67) :
-                Color.FromArgb(135, 255, 235, 118);
+                level.CourseNumber == 5 ? Color.FromArgb(135, 255, 235, 118) :
+                Color.FromArgb(135, 225, 133, 255);
             Color hotColor = level.CourseNumber == 1 ? Color.FromArgb(230, 255, 249, 186) :
                 level.CourseNumber == 2 ? Color.FromArgb(220, 241, 255, 255) :
                 level.CourseNumber == 3 ? Color.FromArgb(215, 255, 246, 255) :
                 level.CourseNumber == 4 ? Color.FromArgb(220, 255, 227, 137) :
-                Color.FromArgb(215, 255, 255, 255);
+                level.CourseNumber == 5 ? Color.FromArgb(215, 255, 255, 255) :
+                Color.FromArgb(225, 64, 236, 210);
 
             using (SolidBrush soft = new SolidBrush(softColor))
             using (SolidBrush hot = new SolidBrush(hotColor))
@@ -152,7 +164,8 @@ namespace OmniWorld
                 level.CourseNumber == 2 ? Color.FromArgb(70, 74, 241, 225) :
                 level.CourseNumber == 3 ? Color.FromArgb(90, 255, 216, 255) :
                 level.CourseNumber == 4 ? Color.FromArgb(92, 255, 186, 79) :
-                Color.FromArgb(76, 255, 255, 255);
+                level.CourseNumber == 5 ? Color.FromArgb(76, 255, 255, 255) :
+                Color.FromArgb(88, 225, 133, 255);
 
             using (SolidBrush mote = new SolidBrush(moteColor))
             {
@@ -164,7 +177,7 @@ namespace OmniWorld
                     if (x < -20f) x += viewport.Width + 40f;
 
                     float y = 34f + ((i * 47f + time * (level.CourseNumber >= 3 ? 18f : 8f)) % (viewport.Height - 135f));
-                    float size = level.CourseNumber == 3 ? 3f + (i % 3) : level.CourseNumber == 4 ? 2.5f + (i % 2) : 2f;
+                    float size = level.CourseNumber == 3 ? 3f + (i % 3) : level.CourseNumber == 4 ? 2.5f + (i % 2) : level.CourseNumber == 6 ? 3f + (i % 4) * 0.5f : 2f;
                     g.FillEllipse(mote, x, y, size, size);
                 }
             }
@@ -299,6 +312,29 @@ namespace OmniWorld
                     g.FillRectangle(glass, x + 137f, y + 42f, 10f, 10f);
                     g.FillRectangle(glass, x + 151f, y + 82f, 10f, 10f);
                     g.DrawLine(rail, x - 12f, y + 72f + antenna, x + 230f, y + 42f - antenna);
+                }
+            }
+        }
+
+        private void DrawPrismDecor(Graphics g, Size viewport, Vec2 camera, float time)
+        {
+            using (SolidBrush tower = new SolidBrush(Color.FromArgb(116, 36, 44, 103)))
+            using (SolidBrush prismA = new SolidBrush(Color.FromArgb(125, 225, 133, 255)))
+            using (SolidBrush prismB = new SolidBrush(Color.FromArgb(120, 64, 236, 210)))
+            using (Pen beam = new Pen(Color.FromArgb(125, 255, 247, 91), 2.4f))
+            using (Pen edge = new Pen(Color.FromArgb(105, 255, 255, 255), 1.5f))
+            {
+                float start = -camera.X * 0.31f % 250f - 250f;
+                for (float x = start; x < viewport.Width + 280f; x += 250f)
+                {
+                    float y = viewport.Height - 218f;
+                    float pulse = (float)Math.Sin(time * 2.8f + x * 0.025f) * 8f;
+                    g.FillRectangle(tower, x + 48f, y + 72f, 28f, 168f);
+                    g.FillRectangle(tower, x + 158f, y + 34f, 34f, 206f);
+                    DrawCrystalCluster(g, prismA, edge, x + 76f, y + 54f + pulse, 58f, 118f);
+                    DrawCrystalCluster(g, prismB, edge, x + 126f, y + 82f - pulse * 0.55f, 48f, 90f);
+                    g.DrawLine(beam, x - 14f, y + 72f + pulse, x + 246f, y + 22f - pulse);
+                    g.DrawLine(beam, x + 20f, y + 135f - pulse * 0.4f, x + 224f, y + 102f + pulse * 0.3f);
                 }
             }
         }
@@ -494,6 +530,14 @@ namespace OmniWorld
                 {
                     DrawBurstCell(g, rect, item.BobTimer);
                 }
+                else if (item.Kind == CollectibleKind.DataCore)
+                {
+                    DrawDataCore(g, rect, item.BobTimer);
+                }
+                else if (item.Kind == CollectibleKind.AegisCore)
+                {
+                    DrawAegisCore(g, rect, item.BobTimer);
+                }
                 else
                 {
                     DrawHeart(g, rect);
@@ -628,7 +672,7 @@ namespace OmniWorld
                         g.FillRectangle(foot, rect.Right - 12f, rect.Bottom - 4f, 9f, 4f);
                     }
                 }
-                else
+                else if (enemy.Kind == EnemyKind.Seeker)
                 {
                     using (SolidBrush fill = new SolidBrush(Color.FromArgb(225, 64, 112)))
                     using (SolidBrush core = new SolidBrush(Color.FromArgb(255, 231, 90)))
@@ -651,6 +695,30 @@ namespace OmniWorld
                         });
                         g.DrawPolygon(edge, body);
                         g.FillEllipse(core, rect.X + 9f, rect.Y + 8f, 9f, 9f);
+                    }
+                }
+                else
+                {
+                    using (SolidBrush wing = new SolidBrush(Color.FromArgb(110, 122, 208, 255)))
+                    using (SolidBrush shell = new SolidBrush(Color.FromArgb(78, 98, 196)))
+                    using (SolidBrush glow = new SolidBrush(Color.FromArgb(255, 247, 91)))
+                    using (SolidBrush eye = new SolidBrush(Color.White))
+                    using (Pen edge = new Pen(Color.FromArgb(28, 42, 112), 2f))
+                    {
+                        g.FillEllipse(wing, rect.X - 8f, rect.Y + 5f, 17f, 11f);
+                        g.FillEllipse(wing, rect.Right - 9f, rect.Y + 5f, 17f, 11f);
+                        PointF[] body = new PointF[]
+                        {
+                            new PointF(rect.X + rect.Width / 2f, rect.Y),
+                            new PointF(rect.Right, rect.Y + rect.Height * 0.45f),
+                            new PointF(rect.X + rect.Width * 0.67f, rect.Bottom),
+                            new PointF(rect.X + rect.Width * 0.33f, rect.Bottom),
+                            new PointF(rect.X, rect.Y + rect.Height * 0.45f)
+                        };
+                        g.FillPolygon(shell, body);
+                        g.DrawPolygon(edge, body);
+                        g.FillEllipse(glow, rect.X + 9f, rect.Y + 7f, 10f, 8f);
+                        g.FillRectangle(eye, rect.X + (enemy.Direction > 0 ? 17f : 8f), rect.Y + 8f, 4f, 4f);
                     }
                 }
             }
@@ -711,6 +779,16 @@ namespace OmniWorld
             bool blink = player.InvincibleTimer > 0f && ((int)(player.InvincibleTimer * 12f) % 2 == 0);
             if (blink) return;
 
+            if (player.AegisCharges > 0)
+            {
+                using (SolidBrush shieldGlow = new SolidBrush(Color.FromArgb(50, 122, 208, 255)))
+                using (Pen shieldRing = new Pen(Color.FromArgb(145, 180, 232, 255), 2f))
+                {
+                    g.FillEllipse(shieldGlow, rect.X - 9f, rect.Y - 8f, rect.Width + 18f, rect.Height + 18f);
+                    g.DrawEllipse(shieldRing, rect.X - 8f, rect.Y - 7f, rect.Width + 16f, rect.Height + 16f);
+                }
+            }
+
             if (player.Powered)
             {
                 using (SolidBrush glow = new SolidBrush(Color.FromArgb(90, 62, 244, 221)))
@@ -738,9 +816,28 @@ namespace OmniWorld
                 }
             }
 
+            if (player.Slamming)
+            {
+                using (SolidBrush flare = new SolidBrush(Color.FromArgb(115, 255, 247, 91)))
+                using (SolidBrush coreTrail = new SolidBrush(Color.FromArgb(90, 225, 133, 255)))
+                using (Pen speed = new Pen(Color.FromArgb(150, 255, 255, 255), 2f))
+                {
+                    PointF[] spear = new PointF[]
+                    {
+                        new PointF(rect.X - 8f, rect.Y + 4f),
+                        new PointF(rect.Right + 8f, rect.Y + 4f),
+                        new PointF(rect.X + rect.Width / 2f, rect.Bottom + 34f)
+                    };
+                    g.FillPolygon(flare, spear);
+                    g.FillEllipse(coreTrail, rect.X - 9f, rect.Y - 2f, rect.Width + 18f, rect.Height + 16f);
+                    g.DrawLine(speed, rect.X - 8f, rect.Y - 28f, rect.X - 3f, rect.Y - 4f);
+                    g.DrawLine(speed, rect.Right + 7f, rect.Y - 24f, rect.Right + 2f, rect.Y);
+                }
+            }
+
             DrawShadow(g, rect.X + 2f, rect.Bottom - 1f, rect.Width - 4f, 7f);
             float stride = player.OnGround && Math.Abs(player.Velocity.X) > 50f ? (float)Math.Sin(time * 18f) * 2.5f : 0f;
-            float lean = player.OnGround ? Math.Sign(player.Velocity.X) * Math.Min(2.5f, Math.Abs(player.Velocity.X) * 0.01f) : player.Facing * 1.5f;
+            float lean = player.Slamming ? 0f : player.OnGround ? Math.Sign(player.Velocity.X) * Math.Min(2.5f, Math.Abs(player.Velocity.X) * 0.01f) : player.Facing * 1.5f;
 
             using (SolidBrush suit = new SolidBrush(Color.FromArgb(41, 70, 120)))
             using (SolidBrush suitLight = new SolidBrush(Color.FromArgb(63, 103, 166)))
@@ -764,6 +861,63 @@ namespace OmniWorld
                 g.DrawRectangle(edge, rect.X + (player.Facing > 0 ? 18f : -1f) + lean, rect.Y + 15f - stride * 0.4f, 7f, 5f);
                 g.FillRectangle(boot, rect.X + 5f + stride, rect.Bottom - 4f, 8f, 4f);
                 g.FillRectangle(boot, rect.Right - 13f - stride, rect.Bottom - 4f, 8f, 4f);
+            }
+        }
+
+        private void DrawWorldLighting(Graphics g, Game game, Vec2 camera, float time)
+        {
+            Level level = game.CurrentLevel;
+
+            for (int i = 0; i < level.Collectibles.Count; i++)
+            {
+                Collectible item = level.Collectibles[i];
+                if (item.Collected) continue;
+
+                Color glowColor = item.Kind == CollectibleKind.DataCore ? Color.FromArgb(70, 225, 133, 255) :
+                    item.Kind == CollectibleKind.FluxCore ? Color.FromArgb(55, 64, 236, 210) :
+                    item.Kind == CollectibleKind.BurstCell ? Color.FromArgb(55, 255, 247, 91) :
+                    item.Kind == CollectibleKind.AegisCore ? Color.FromArgb(60, 122, 208, 255) :
+                    item.Kind == CollectibleKind.Heart ? Color.FromArgb(40, 255, 95, 126) :
+                    Color.FromArgb(30, 255, 218, 70);
+                float pulse = 1f + (float)Math.Sin(item.BobTimer * 5.2f) * 0.12f;
+                DrawSoftGlow(g, item.Position.X + item.Size.Width / 2f - camera.X, item.Position.Y + item.Size.Height / 2f - camera.Y, 34f * pulse, 28f * pulse, glowColor, 4);
+            }
+
+            for (int i = 0; i < level.BouncePads.Count; i++)
+            {
+                BouncePad pad = level.BouncePads[i];
+                float pulse = 1f + (float)Math.Sin(pad.PulseTimer * 8f) * 0.16f;
+                DrawSoftGlow(g, pad.Bounds.Left + pad.Bounds.Width / 2f - camera.X, pad.Bounds.Top + 4f - camera.Y, 42f * pulse, 20f * pulse, Color.FromArgb(48, 64, 236, 210), 3);
+            }
+
+            RectangleF goal = level.Goal.Bounds;
+            float goalPulse = 1f + (float)Math.Sin(time * 4.5f) * 0.12f;
+            DrawSoftGlow(g, goal.Left + goal.Width / 2f - camera.X, goal.Top + goal.Height * 0.52f - camera.Y, 68f * goalPulse, 92f * goalPulse, Color.FromArgb(52, 75, 238, 211), 5);
+
+            Player player = game.Player;
+            RectangleF bounds = player.Bounds;
+            if (player.Powered || player.Bursting || player.Slamming || player.AegisCharges > 0)
+            {
+                Color playerGlow = player.Slamming ? Color.FromArgb(76, 255, 247, 91) :
+                    player.Bursting ? Color.FromArgb(64, 64, 236, 210) :
+                    player.AegisCharges > 0 ? Color.FromArgb(54, 122, 208, 255) :
+                    Color.FromArgb(64, 255, 247, 91);
+                DrawSoftGlow(g, bounds.Left + bounds.Width / 2f - camera.X, bounds.Top + bounds.Height / 2f - camera.Y, player.Slamming ? 50f : 38f, player.Slamming ? 58f : 42f, playerGlow, 4);
+            }
+        }
+
+        private void DrawSoftGlow(Graphics g, float centerX, float centerY, float radiusX, float radiusY, Color color, int layers)
+        {
+            for (int i = layers; i >= 1; i--)
+            {
+                float t = (float)i / layers;
+                int alpha = GameMath.Clamp((int)(color.A * (1f - t * 0.72f)), 0, 255);
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, color.R, color.G, color.B)))
+                {
+                    float rx = radiusX * t;
+                    float ry = radiusY * t;
+                    g.FillEllipse(brush, centerX - rx, centerY - ry, rx * 2f, ry * 2f);
+                }
             }
         }
 
@@ -848,6 +1002,69 @@ namespace OmniWorld
                 g.FillPolygon(body, hex);
                 g.DrawPolygon(edge, hex);
                 g.FillRectangle(notch, rect.X + rect.Width * 0.42f, rect.Y + 5f, rect.Width * 0.16f, rect.Height - 10f);
+            }
+        }
+
+        private void DrawDataCore(Graphics g, RectangleF rect, float timer)
+        {
+            DrawPickupSpark(g, rect, timer);
+
+            float pulse = 3f + (float)Math.Sin(timer * 9f) * 2.5f;
+            float spin = (float)Math.Sin(timer * 4.4f) * 3f;
+            RectangleF glow = new RectangleF(rect.X - pulse, rect.Y - pulse, rect.Width + pulse * 2f, rect.Height + pulse * 2f);
+
+            using (SolidBrush halo = new SolidBrush(Color.FromArgb(90, 225, 133, 255)))
+            using (LinearGradientBrush body = new LinearGradientBrush(rect, Color.FromArgb(255, 247, 91), Color.FromArgb(225, 133, 255), LinearGradientMode.ForwardDiagonal))
+            using (SolidBrush center = new SolidBrush(Color.FromArgb(64, 236, 210)))
+            using (SolidBrush shine = new SolidBrush(Color.FromArgb(235, 255, 255, 255)))
+            using (Pen edge = new Pen(Color.FromArgb(74, 42, 124), 2f))
+            using (Pen ring = new Pen(Color.FromArgb(170, 64, 236, 210), 1.5f))
+            {
+                g.FillEllipse(halo, glow);
+                PointF[] prism = new PointF[]
+                {
+                    new PointF(rect.X + rect.Width * 0.50f, rect.Y - spin),
+                    new PointF(rect.Right + spin, rect.Y + rect.Height * 0.35f),
+                    new PointF(rect.Right - 4f, rect.Bottom - 3f),
+                    new PointF(rect.X + rect.Width * 0.50f, rect.Bottom + spin * 0.4f),
+                    new PointF(rect.X + 4f, rect.Bottom - 3f),
+                    new PointF(rect.X - spin, rect.Y + rect.Height * 0.35f)
+                };
+                g.FillPolygon(body, prism);
+                g.DrawPolygon(edge, prism);
+                g.DrawEllipse(ring, rect.X + 2f, rect.Y + 2f, rect.Width - 4f, rect.Height - 4f);
+                g.FillEllipse(center, rect.X + 8f, rect.Y + 8f, rect.Width - 16f, rect.Height - 16f);
+                g.FillEllipse(shine, rect.X + 8f, rect.Y + 5f, 5f, 5f);
+            }
+        }
+
+        private void DrawAegisCore(Graphics g, RectangleF rect, float timer)
+        {
+            DrawPickupSpark(g, rect, timer);
+
+            float pulse = 2f + (float)Math.Sin(timer * 7.6f) * 2f;
+            RectangleF glow = new RectangleF(rect.X - pulse, rect.Y - pulse, rect.Width + pulse * 2f, rect.Height + pulse * 2f);
+
+            using (SolidBrush halo = new SolidBrush(Color.FromArgb(72, 122, 208, 255)))
+            using (LinearGradientBrush fill = new LinearGradientBrush(rect, Color.FromArgb(122, 208, 255), Color.FromArgb(53, 91, 190), LinearGradientMode.Vertical))
+            using (SolidBrush inner = new SolidBrush(Color.FromArgb(228, 249, 255)))
+            using (Pen edge = new Pen(Color.FromArgb(26, 52, 128), 2f))
+            using (Pen shine = new Pen(Color.FromArgb(185, 255, 255, 255), 1.4f))
+            {
+                g.FillEllipse(halo, glow);
+                PointF[] shield = new PointF[]
+                {
+                    new PointF(rect.X + rect.Width * 0.50f, rect.Y),
+                    new PointF(rect.Right - 2f, rect.Y + rect.Height * 0.24f),
+                    new PointF(rect.Right - 5f, rect.Y + rect.Height * 0.70f),
+                    new PointF(rect.X + rect.Width * 0.50f, rect.Bottom),
+                    new PointF(rect.X + 5f, rect.Y + rect.Height * 0.70f),
+                    new PointF(rect.X + 2f, rect.Y + rect.Height * 0.24f)
+                };
+                g.FillPolygon(fill, shield);
+                g.DrawPolygon(edge, shield);
+                g.FillEllipse(inner, rect.X + 8f, rect.Y + 8f, 8f, 8f);
+                g.DrawLine(shine, rect.X + 8f, rect.Y + 6f, rect.X + 15f, rect.Y + 3f);
             }
         }
 
@@ -955,7 +1172,7 @@ namespace OmniWorld
                     }
                 }
             }
-            else
+            else if (courseNumber == 5)
             {
                 using (Pen stripe = new Pen(Color.FromArgb(150, 255, 217, 92), 1.5f))
                 using (SolidBrush light = new SolidBrush(Color.FromArgb(180, 212, 242, 255)))
@@ -964,6 +1181,19 @@ namespace OmniWorld
                     {
                         g.DrawLine(stripe, rect.X + 4f, rect.Y + 4f, rect.X + 24f, rect.Y + 10f);
                         g.FillRectangle(light, rect.X + 10f, rect.Y + 3f, 5f, 5f);
+                    }
+                }
+            }
+            else
+            {
+                using (Pen prism = new Pen(Color.FromArgb(155, 225, 133, 255), 1.4f))
+                using (SolidBrush node = new SolidBrush(Color.FromArgb(190, 64, 236, 210)))
+                {
+                    if (pattern == 1 || pattern == 3 || pattern == 5)
+                    {
+                        g.DrawLine(prism, rect.X + 5f, rect.Y + 9f, rect.X + 16f, rect.Y + 3f);
+                        g.DrawLine(prism, rect.X + 16f, rect.Y + 3f, rect.X + 27f, rect.Y + 9f);
+                        g.FillEllipse(node, rect.X + 14f, rect.Y + 2f, 5f, 5f);
                     }
                 }
             }
@@ -1031,7 +1261,7 @@ namespace OmniWorld
                     }
                 }
             }
-            else
+            else if (level.CourseNumber == 5)
             {
                 using (Pen wind = new Pen(Color.FromArgb(85, 255, 255, 255), 2f))
                 using (SolidBrush light = new SolidBrush(Color.FromArgb(70, 255, 217, 92)))
@@ -1046,6 +1276,21 @@ namespace OmniWorld
                     }
                 }
             }
+            else
+            {
+                using (Pen beam = new Pen(Color.FromArgb(82, 225, 133, 255), 2f))
+                using (SolidBrush node = new SolidBrush(Color.FromArgb(80, 64, 236, 210)))
+                {
+                    float start = -camera.X * 0.86f % 92f - 92f;
+                    for (float x = start; x < viewport.Width + 120f; x += 92f)
+                    {
+                        float y = viewport.Height - 66f + (float)Math.Sin(time * 3.1f + x * 0.03f) * 16f;
+                        g.DrawLine(beam, x, y, x + 32f, y - 34f);
+                        g.DrawLine(beam, x + 32f, y - 34f, x + 68f, y - 16f);
+                        g.FillEllipse(node, x + 28f, y - 38f, 9f, 9f);
+                    }
+                }
+            }
         }
 
         private void DrawAtmosphereOverlay(Graphics g, Level level, Size viewport)
@@ -1054,7 +1299,8 @@ namespace OmniWorld
                 level.CourseNumber == 2 ? Color.FromArgb(24, 75, 238, 211) :
                 level.CourseNumber == 3 ? Color.FromArgb(32, 255, 170, 255) :
                 level.CourseNumber == 4 ? Color.FromArgb(35, 255, 134, 67) :
-                Color.FromArgb(28, 255, 255, 255);
+                level.CourseNumber == 5 ? Color.FromArgb(28, 255, 255, 255) :
+                Color.FromArgb(34, 225, 133, 255);
             Color bottom = Color.FromArgb(26, 7, 14, 28);
 
             using (LinearGradientBrush wash = new LinearGradientBrush(new Rectangle(0, 0, viewport.Width, viewport.Height), top, bottom, LinearGradientMode.Vertical))

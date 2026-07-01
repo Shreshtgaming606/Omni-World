@@ -30,13 +30,16 @@ namespace OmniWorld
                 g.FillRectangle(panel, 12, 12, viewport.Width - 24, 48);
                 g.DrawRectangle(edge, 12, 12, viewport.Width - 24, 48);
                 g.DrawString("OMNI WORLD", bodyFont, accent, 24, 17);
-                g.DrawString("Course " + game.CurrentLevel.CourseNumber + ": " + game.CurrentLevel.Name, bodyFont, text, 156, 17);
-                g.DrawString("Lives " + p.Lives, bodyFont, text, 455, 17);
-                g.DrawString("Health", bodyFont, text, 545, 17);
-                DrawHealthPips(g, p.Health, p.MaxHealth, 612, 24);
-                g.DrawString("Orbs " + p.Orbs, bodyFont, text, 695, 17);
-                g.DrawString("Score " + p.Score, bodyFont, text, viewport.Width - 150, 17);
+                g.DrawString("Course " + game.CurrentLevel.CourseNumber + ": " + game.CurrentLevel.Name, bodyFont, text, 150, 17);
+                g.DrawString("Lives " + p.Lives, bodyFont, text, 394, 17);
+                g.DrawString("Health", bodyFont, text, 475, 17);
+                DrawHealthPips(g, p.Health, p.MaxHealth, 542, 24);
+                g.DrawString("Orbs " + p.Orbs, bodyFont, text, 615, 17);
+                g.DrawString("Cores " + p.DataCores + "/" + game.CurrentDataCoreTotal, bodyFont, text, 695, 17);
+                g.DrawString("Score " + p.Score, bodyFont, text, viewport.Width - 148, 17);
                 DrawBurstMeter(g, p, viewport.Width - 198, 64);
+                DrawAegisPips(g, p, 254, 64);
+                DrawObjectivePanel(g, game, 18, 76);
 
                 if (p.Powered)
                 {
@@ -72,9 +75,13 @@ namespace OmniWorld
                 g.DrawString("Omni World", titleFont, text, 54, 24);
                 g.DrawString("Core-Man Course Select", headerFont, muted, 60, 80);
 
+                int cardHeight = game.CourseNames.Length > 5 ? 50 : 60;
+                int cardGap = game.CourseNames.Length > 5 ? 6 : 14;
+                int listTop = game.CourseNames.Length > 5 ? 106 : 118;
+
                 for (int i = 0; i < game.CourseNames.Length; i++)
                 {
-                    Rectangle rect = new Rectangle(76, 118 + i * 74, viewport.Width - 152, 60);
+                    Rectangle rect = new Rectangle(70, listTop + i * (cardHeight + cardGap), viewport.Width - 140, cardHeight);
                     bool isSelected = i == game.SelectedCourseIndex;
 
                     if (isSelected)
@@ -90,13 +97,20 @@ namespace OmniWorld
                         }
                     }
 
-                    DrawCoursePreview(g, i + 1, new Rectangle(rect.X + 14, rect.Y + 8, 96, 44));
+                    DrawCoursePreview(g, i + 1, new Rectangle(rect.X + 12, rect.Y + 7, 92, cardHeight - 14));
 
-                    g.DrawString("Course " + (i + 1) + "  " + game.CourseNames[i], bodyFont, text, rect.X + 128, rect.Y + 7);
-                    g.DrawString(game.CourseTaglines[i], tinyFont, muted, rect.X + 130, rect.Y + 34);
+                    RectangleF nameRect = new RectangleF(rect.X + 118, rect.Y + 5, rect.Width - 300, 20);
+                    RectangleF tagRect = new RectangleF(rect.X + 120, rect.Y + 29, rect.Width - 310, 18);
+                    g.DrawString("Course " + (i + 1) + "  " + game.CourseNames[i], bodyFont, text, nameRect);
+                    g.DrawString(game.CourseTaglines[i], tinyFont, muted, tagRect);
+
+                    string scoreText = game.CourseBestScores[i] > 0 ? "Best " + game.CourseBestScores[i] : "Best --";
+                    string coreText = "Cores " + game.CourseBestDataCores[i] + "/" + game.CourseDataCoreTotals[i] + "  Obj " + game.CourseBestObjectiveStars[i] + "/" + Game.ObjectiveTotal;
+                    g.DrawString(scoreText, tinyFont, muted, rect.Right - 152, rect.Y + 8);
+                    g.DrawString(coreText, tinyFont, complete, rect.Right - 178, rect.Y + 30);
                     if (game.CourseCompleted[i])
                     {
-                        g.DrawString("CLEAR", bodyFont, complete, rect.Right - 92, rect.Y + 20);
+                        g.DrawString("CLEAR", bodyFont, complete, rect.Right - 74, rect.Y + 8);
                     }
                 }
 
@@ -124,7 +138,8 @@ namespace OmniWorld
             {
                 Center(g, "Course Clear!", titleFont, accent, viewport.Width, 170);
                 Center(g, game.CurrentLevel.Name + " complete", headerFont, text, viewport.Width, 242);
-                Center(g, "Enter returns to course select", bodyFont, text, viewport.Width, 296);
+                Center(g, "Score " + game.Player.Score + "    Data Cores " + game.Player.DataCores + "/" + game.CurrentDataCoreTotal + "    Objectives " + game.CurrentObjectiveStars + "/" + Game.ObjectiveTotal, bodyFont, accent, viewport.Width, 286);
+                Center(g, "Enter returns to course select", bodyFont, text, viewport.Width, 326);
             }
         }
 
@@ -214,28 +229,70 @@ namespace OmniWorld
             }
         }
 
+        private void DrawAegisPips(Graphics g, Player player, int x, int y)
+        {
+            using (SolidBrush label = new SolidBrush(Color.FromArgb(230, 255, 255, 255)))
+            using (SolidBrush empty = new SolidBrush(Color.FromArgb(90, 255, 255, 255)))
+            using (SolidBrush fill = new SolidBrush(Color.FromArgb(122, 208, 255)))
+            using (Pen edge = new Pen(Color.FromArgb(130, 255, 255, 255), 1f))
+            {
+                g.DrawString("AEGIS", tinyFont, label, x, y - 2);
+                for (int i = 0; i < 2; i++)
+                {
+                    Rectangle pip = new Rectangle(x + 52 + i * 19, y + 1, 13, 13);
+                    g.FillEllipse(i < player.AegisCharges ? fill : empty, pip);
+                    g.DrawEllipse(edge, pip);
+                }
+            }
+        }
+
+        private void DrawObjectivePanel(Graphics g, Game game, int x, int y)
+        {
+            using (SolidBrush panel = new SolidBrush(Color.FromArgb(155, 12, 24, 42)))
+            using (SolidBrush text = new SolidBrush(Color.FromArgb(236, 248, 255)))
+            using (SolidBrush done = new SolidBrush(Color.FromArgb(255, 247, 91)))
+            using (Pen edge = new Pen(Color.FromArgb(82, 255, 255, 255)))
+            {
+                Rectangle rect = new Rectangle(x, y, 218, 104);
+                g.FillRectangle(panel, rect);
+                g.DrawRectangle(edge, rect);
+                g.DrawString("OBJECTIVES " + game.CurrentObjectiveStars + "/" + Game.ObjectiveTotal, tinyFont, done, x + 10, y + 8);
+
+                for (int i = 0; i < Game.ObjectiveTotal; i++)
+                {
+                    bool complete = game.IsCurrentObjectiveComplete(i);
+                    string mark = complete ? "[x] " : "[ ] ";
+                    g.DrawString(mark + game.GetCurrentObjectiveText(i), tinyFont, complete ? done : text, x + 10, y + 29 + i * 17);
+                }
+            }
+        }
+
         private void DrawCoursePreview(Graphics g, int courseNumber, Rectangle rect)
         {
             Color skyTop = courseNumber == 1 ? Color.FromArgb(94, 195, 252) :
                 courseNumber == 2 ? Color.FromArgb(65, 109, 178) :
                 courseNumber == 3 ? Color.FromArgb(53, 41, 112) :
                 courseNumber == 4 ? Color.FromArgb(71, 47, 61) :
-                Color.FromArgb(48, 74, 152);
+                courseNumber == 5 ? Color.FromArgb(48, 74, 152) :
+                Color.FromArgb(42, 31, 96);
             Color skyBottom = courseNumber == 1 ? Color.FromArgb(203, 244, 255) :
                 courseNumber == 2 ? Color.FromArgb(199, 225, 239) :
                 courseNumber == 3 ? Color.FromArgb(211, 148, 202) :
                 courseNumber == 4 ? Color.FromArgb(238, 130, 71) :
-                Color.FromArgb(186, 226, 255);
+                courseNumber == 5 ? Color.FromArgb(186, 226, 255) :
+                Color.FromArgb(64, 203, 208);
             Color ground = courseNumber == 1 ? Color.FromArgb(79, 210, 90) :
                 courseNumber == 2 ? Color.FromArgb(88, 224, 177) :
                 courseNumber == 3 ? Color.FromArgb(117, 238, 211) :
                 courseNumber == 4 ? Color.FromArgb(246, 164, 77) :
-                Color.FromArgb(255, 217, 92);
+                courseNumber == 5 ? Color.FromArgb(255, 217, 92) :
+                Color.FromArgb(225, 133, 255);
             Color body = courseNumber == 1 ? Color.FromArgb(99, 142, 67) :
                 courseNumber == 2 ? Color.FromArgb(67, 85, 122) :
                 courseNumber == 3 ? Color.FromArgb(86, 66, 147) :
                 courseNumber == 4 ? Color.FromArgb(104, 72, 80) :
-                Color.FromArgb(54, 92, 145);
+                courseNumber == 5 ? Color.FromArgb(54, 92, 145) :
+                Color.FromArgb(45, 66, 126);
 
             using (LinearGradientBrush sky = new LinearGradientBrush(rect, skyTop, skyBottom, LinearGradientMode.Vertical))
             using (SolidBrush cloud = new SolidBrush(Color.FromArgb(80, 255, 255, 255)))
@@ -286,7 +343,7 @@ namespace OmniWorld
                         g.FillEllipse(fire, rect.X + 38, rect.Bottom - 35, 26, 14);
                     }
                 }
-                else
+                else if (courseNumber == 5)
                 {
                     using (SolidBrush tower = new SolidBrush(Color.FromArgb(48, 82, 137)))
                     using (Pen rail = new Pen(Color.FromArgb(255, 217, 92), 2f))
@@ -294,6 +351,16 @@ namespace OmniWorld
                         g.FillRectangle(tower, rect.X + 18, rect.Y + 17, 15, 28);
                         g.FillRectangle(tower, rect.X + 68, rect.Y + 8, 13, 37);
                         g.DrawLine(rail, rect.X + 6, rect.Y + 18, rect.Right - 6, rect.Y + 8);
+                    }
+                }
+                else
+                {
+                    using (SolidBrush prism = new SolidBrush(Color.FromArgb(185, 225, 133, 255)))
+                    using (Pen beam = new Pen(Color.FromArgb(64, 236, 210), 2f))
+                    {
+                        g.DrawLine(beam, rect.X + 8, rect.Y + 35, rect.Right - 8, rect.Y + 10);
+                        g.FillPolygon(prism, new Point[] { new Point(rect.X + 62, rect.Bottom - 18), new Point(rect.X + 78, rect.Y + 9), new Point(rect.X + 94, rect.Bottom - 18) });
+                        g.FillPolygon(prism, new Point[] { new Point(rect.X + 33, rect.Bottom - 18), new Point(rect.X + 46, rect.Y + 21), new Point(rect.X + 58, rect.Bottom - 18) });
                     }
                 }
 

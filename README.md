@@ -6,29 +6,38 @@ This first version is built with C# WinForms/GDI+ because the target machine alr
 
 ## Features
 
-- 5 complete playable courses:
+- 6 complete playable courses:
   - Course 1: **Greenlit Grove**, a beginner grassy course
   - Course 2: **Voltage Vale**, a harder obstacle course
   - Course 3: **Crystal Canopy**, a twilight crystal course with longer gaps and moving-platform timing
   - Course 4: **Emberworks**, an industrial heat-vent course with pressure enemies
   - Course 5: **Skyline Circuit**, a fast rooftop course built around bounce pads and chained bursts
+  - Course 6: **Prism Reactor**, a neon finale that mixes bounce pads, moving platforms, hazards, and burst routes
 - Smooth side-scrolling camera
 - Walking, running, variable-height jumping, gravity, and platform physics
 - **Core Burst** dash with cooldown, spark trail, enemy impact, and breakable-block shatter behavior
+- **Core Slam** aerial dive attack that crashes downward, defeats nearby enemies, breaks nearby breakable blocks, and creates a shockwave
 - **Burst Cells** that instantly recharge Core Burst when collected
+- **Data Cores** as rare optional collectibles with big score rewards, Burst recharge, best-course tracking, and an all-cores extra-life bonus
+- **Aegis Cores** that grant up to two shield charges and absorb incoming damage
 - **Bounce Pads** that launch Core-Man upward and recharge Core Burst for aerial routes
 - Floors, walls, ceilings, breakable blocks, spikes, pits, moving platforms, checkpoints, and goal gates
-- Original enemies: Rollers, Hoppers, and Seekers
+- Original enemies: Rollers, Hoppers, Seekers, and floating Drifters
 - Stomp-to-defeat enemy behavior
 - Energy orb collectibles, score, health, lives, and checkpoints
 - Original power-up: **Flux Core**, which boosts speed and lets Core-Man smash enemies and breakable blocks on contact
 - Stomp combo bonus scoring, landing dust, pickup sparks, impact particles, and small camera shake feedback
+- Per-course objective checklist: clear the beacon, collect Data Cores, meet an energy-orb goal, and defeat enough enemies
 - Smoother camera look-ahead that shows more of the course in the direction Core-Man is moving
+- Slam-aware camera framing that shows more of the landing area during downward dives
 - Decorated terrain surfaces, foreground grass/tech effects, checkpoint bases, and subtle atmosphere overlays
+- Additional glow/lighting pass for Data Cores, bounce pads, goals, power states, bursts, and slam dives
+- Visible Aegis shield aura around Core-Man while a shield charge is available
 - Course geometry tuned so progression platforms and checkpoint respawns stay reachable
 - Original upgraded in-code art for energy coins, core blocks, checkpoint flags, enemies, and the end beacon
-- Course-specific scenery for grassy, tech-valley, crystal-canopy, industrial, and skyline themes
+- Course-specific scenery for grassy, tech-valley, crystal-canopy, industrial, skyline, and prism-reactor themes
 - Course-selection screen, pause menu, game over screen, course-clear screen, and victory screen
+- Course-select best score and Data Core progress tracking
 - Basic generated sound effects and looping background music support
 - Original placeholder pixel-art-style visuals drawn in code
 
@@ -38,6 +47,7 @@ This first version is built with C# WinForms/GDI+ because the target machine alr
 - Run: `Shift`
 - Jump: `Space`, `Z`, or `Up`
 - Core Burst dash: `X`, `C`, or `Ctrl`
+- Core Slam: press `Down` or `S` while airborne
 - Pause: `Esc` or `P`
 - Select/menu confirm: `Enter`
 - Menu navigation: `Up/Down` or `W/S`
@@ -103,7 +113,7 @@ src/
   GameForm.cs        Windows window, fixed-step-ish loop, and keyboard events
   InputState.cs      Keyboard input and per-frame pressed-state tracking
   Level.cs           Tile map, course data containers, and helper methods
-  LevelFactory.cs    The five handcrafted playable courses
+  LevelFactory.cs    The six handcrafted playable courses
   MathTypes.cs       Small vector/math helpers and game enums
   Physics.cs         Collision, movement, tiles, hazards, and platform physics
   Player.cs          Core-Man movement, health, lives, scoring, and power-up state

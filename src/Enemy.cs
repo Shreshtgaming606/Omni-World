@@ -12,9 +12,10 @@ namespace OmniWorld
         public bool OnGround;
         public float StunTimer;
         public float BrainTimer;
+        public float HomeY;
 
         public Enemy(EnemyKind kind, float x, float y, float leftBound, float rightBound)
-            : base(x, y, kind == EnemyKind.Seeker ? 28f : 26f, kind == EnemyKind.Hopper ? 30f : 24f)
+            : base(x, y, kind == EnemyKind.Seeker || kind == EnemyKind.Drifter ? 28f : 26f, kind == EnemyKind.Hopper ? 30f : kind == EnemyKind.Drifter ? 22f : 24f)
         {
             Kind = kind;
             Direction = 1;
@@ -23,6 +24,7 @@ namespace OmniWorld
             OnGround = false;
             StunTimer = 0f;
             BrainTimer = 0f;
+            HomeY = y;
         }
 
         public void Update(Level level, Player player, float dt)
@@ -56,6 +58,31 @@ namespace OmniWorld
                 {
                     Velocity.X = Direction * 44f;
                 }
+            }
+            else if (Kind == EnemyKind.Drifter)
+            {
+                float distanceToPlayer = player.Position.X - Position.X;
+                if (Math.Abs(distanceToPlayer) < 230f)
+                {
+                    Direction = distanceToPlayer >= 0f ? 1 : -1;
+                }
+
+                Velocity.X = Direction * 62f;
+                Position.X += Velocity.X * dt;
+                Position.Y = HomeY + (float)Math.Sin(BrainTimer * 2.7f) * 22f;
+
+                if (Position.X < LeftBound)
+                {
+                    Position.X = LeftBound;
+                    Direction = 1;
+                }
+                else if (Position.X + Size.Width > RightBound)
+                {
+                    Position.X = RightBound - Size.Width;
+                    Direction = -1;
+                }
+
+                return;
             }
 
             Velocity.Y += 1250f * dt;

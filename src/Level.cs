@@ -19,6 +19,8 @@ namespace OmniWorld
         public Color SkyBottom;
         public Color GroundTop;
         public Color GroundBody;
+        public int ObjectiveOrbGoal;
+        public int ObjectiveEnemyGoal;
         public readonly List<Enemy> Enemies;
         public readonly List<Collectible> Collectibles;
         public readonly List<MovingPlatform> MovingPlatforms;
@@ -39,6 +41,8 @@ namespace OmniWorld
             SkyBottom = Color.FromArgb(198, 241, 255);
             GroundTop = Color.FromArgb(70, 203, 93);
             GroundBody = Color.FromArgb(91, 128, 62);
+            ObjectiveOrbGoal = 20;
+            ObjectiveEnemyGoal = 3;
             Enemies = new List<Enemy>();
             Collectibles = new List<Collectible>();
             MovingPlatforms = new List<MovingPlatform>();
@@ -141,6 +145,16 @@ namespace OmniWorld
             Collectibles.Add(new Collectible(CollectibleKind.BurstCell, tileX * TileSize + 4f, tileY * TileSize + 4f));
         }
 
+        public void AddDataCore(int tileX, int tileY)
+        {
+            Collectibles.Add(new Collectible(CollectibleKind.DataCore, tileX * TileSize + 4f, tileY * TileSize + 4f));
+        }
+
+        public void AddAegisCore(int tileX, int tileY)
+        {
+            Collectibles.Add(new Collectible(CollectibleKind.AegisCore, tileX * TileSize + 4f, tileY * TileSize + 4f));
+        }
+
         public void AddGroundEnemy(EnemyKind kind, int tileX, int floorTileY, int leftBoundTile, int rightBoundTile)
         {
             float enemyHeight = kind == EnemyKind.Hopper ? 30f : 24f;
@@ -148,6 +162,16 @@ namespace OmniWorld
                 kind,
                 tileX * TileSize + 3f,
                 floorTileY * TileSize - enemyHeight,
+                leftBoundTile * TileSize,
+                rightBoundTile * TileSize));
+        }
+
+        public void AddFlyingEnemy(EnemyKind kind, int tileX, int tileY, int leftBoundTile, int rightBoundTile)
+        {
+            Enemies.Add(new Enemy(
+                kind,
+                tileX * TileSize + 2f,
+                tileY * TileSize + 5f,
                 leftBoundTile * TileSize,
                 rightBoundTile * TileSize));
         }
@@ -165,6 +189,12 @@ namespace OmniWorld
         public void SetGoal(int tileX, int groundTileY)
         {
             Goal = new GoalGate(tileX * TileSize, groundTileY * TileSize);
+        }
+
+        public void SetObjectives(int orbGoal, int enemyGoal)
+        {
+            ObjectiveOrbGoal = orbGoal;
+            ObjectiveEnemyGoal = enemyGoal;
         }
     }
 }

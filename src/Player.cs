@@ -21,6 +21,10 @@ namespace OmniWorld
         public int MaxHealth;
         public int Score;
         public int Orbs;
+        public int DataCores;
+        public int AegisCharges;
+        public int EnemiesDefeated;
+        public int SlamHits;
         public bool OnGround;
         public int Facing;
         public Vec2 RespawnPoint;
@@ -29,6 +33,9 @@ namespace OmniWorld
         public float BurstTimer;
         public float BurstCooldown;
         public bool BurstStartedThisFrame;
+        public bool SlamStartedThisFrame;
+        public bool ShieldBlockedThisFrame;
+        public bool Slamming;
 
         private float coyoteTimer;
         private float jumpBufferTimer;
@@ -67,6 +74,10 @@ namespace OmniWorld
             Health = MaxHealth;
             Score = 0;
             Orbs = 0;
+            DataCores = 0;
+            AegisCharges = 0;
+            EnemiesDefeated = 0;
+            SlamHits = 0;
             OnGround = false;
             Facing = 1;
             InvincibleTimer = 0f;
@@ -74,6 +85,9 @@ namespace OmniWorld
             BurstTimer = 0f;
             BurstCooldown = 0f;
             BurstStartedThisFrame = false;
+            SlamStartedThisFrame = false;
+            ShieldBlockedThisFrame = false;
+            Slamming = false;
             coyoteTimer = 0f;
             jumpBufferTimer = 0f;
         }
@@ -89,6 +103,9 @@ namespace OmniWorld
             BurstTimer = 0f;
             BurstCooldown = 0.35f;
             BurstStartedThisFrame = false;
+            SlamStartedThisFrame = false;
+            ShieldBlockedThisFrame = false;
+            Slamming = false;
             coyoteTimer = 0f;
             jumpBufferTimer = 0f;
         }
@@ -96,6 +113,8 @@ namespace OmniWorld
         public void UpdateInput(InputState input, float dt, AudioManager audio)
         {
             BurstStartedThisFrame = false;
+            SlamStartedThisFrame = false;
+            ShieldBlockedThisFrame = false;
             if (InvincibleTimer > 0f) InvincibleTimer -= dt;
             if (PowerTimer > 0f) PowerTimer -= dt;
             if (BurstCooldown > 0f) BurstCooldown -= dt;
@@ -118,9 +137,23 @@ namespace OmniWorld
                 audio.PlayDash();
             }
 
+            if (!OnGround && !Bursting && !Slamming && input.SlamPressed)
+            {
+                Slamming = true;
+                SlamStartedThisFrame = true;
+                Velocity.X *= 0.35f;
+                Velocity.Y = MaxFallSpeed;
+                audio.PlaySlamStart();
+            }
+
             if (Bursting)
             {
                 Velocity.X = Facing * (Powered ? BurstSpeed * 1.12f : BurstSpeed);
+            }
+            else if (Slamming)
+            {
+                Velocity.X = GameMath.Approach(Velocity.X, 0f, Friction * 0.45f * dt);
+                if (Velocity.Y < MaxFallSpeed * 0.88f) Velocity.Y = MaxFallSpeed * 0.88f;
             }
             else
             {
@@ -145,7 +178,7 @@ namespace OmniWorld
             if (input.JumpPressed) jumpBufferTimer = 0.12f;
             else jumpBufferTimer -= dt;
 
-            if (jumpBufferTimer > 0f && coyoteTimer > 0f)
+            if (jumpBufferTimer > 0f && coyoteTimer > 0f && !Slamming)
             {
                 Velocity.Y = JumpVelocity;
                 OnGround = false;
@@ -155,12 +188,12 @@ namespace OmniWorld
             }
 
             // Variable jump height: releasing jump early trims upward velocity.
-            if (!input.JumpHeld && Velocity.Y < -190f)
+            if (!input.JumpHeld && Velocity.Y < -190f && !Slamming)
             {
                 Velocity.Y = -190f;
             }
 
-            Velocity.Y += (Bursting ? Gravity * 0.38f : Gravity) * dt;
+            Velocity.Y += (Slamming ? Gravity * 1.85f : Bursting ? Gravity * 0.38f : Gravity) * dt;
             if (Velocity.Y > MaxFallSpeed) Velocity.Y = MaxFallSpeed;
         }
 
@@ -173,6 +206,17 @@ namespace OmniWorld
         public bool TakeDamage(AudioManager audio)
         {
             if (InvincibleTimer > 0f || Powered) return false;
+
+            if (AegisCharges > 0)
+            {
+                AegisCharges--;
+                ShieldBlockedThisFrame = true;
+                InvincibleTimer = 0.85f;
+                Velocity.X = -Facing * 95f;
+                Velocity.Y = -190f;
+                audio.PlayShield();
+                return false;
+            }
 
             Health--;
             InvincibleTimer = 1.1f;

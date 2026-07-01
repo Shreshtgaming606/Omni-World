@@ -95,13 +95,16 @@ namespace OmniWorld
         EnergyOrb,
         FluxCore,
         Heart,
-        BurstCell
+        BurstCell,
+        DataCore,
+        AegisCore
     }
 
     public enum EnemyKind
     {
         Roller,
         Hopper,
-        Seeker
+        Seeker,
+        Drifter
     }
 }
